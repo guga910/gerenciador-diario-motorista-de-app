@@ -10,6 +10,11 @@ public class DiariaMotoristaResumo {
 	private BigDecimal valorCombustivel;
 	private BigDecimal valorLiquido;
 	private BigDecimal RealPorKm;
+	
+	public DiariaMotoristaResumo() {
+		// TODO Auto-generated constructor stub
+	}
+	
 	public Integer getDiasTrabalhados() {
 		return diasTrabalhados;
 	}
@@ -46,6 +51,13 @@ public class DiariaMotoristaResumo {
 	public void setRealPorKm(BigDecimal realPorKm) {
 		RealPorKm = realPorKm;
 	}
+	@Override
+	public String toString() {
+		return "DiariaMotoristaResumo [diasTrabalhados=" + diasTrabalhados + ", kmsRodados=" + kmsRodados
+				+ ", valorBruto=" + valorBruto + ", valorCombustivel=" + valorCombustivel + ", valorLiquido="
+				+ valorLiquido + ", RealPorKm=" + RealPorKm + "]";
+	}
+	
 	
 	
 	

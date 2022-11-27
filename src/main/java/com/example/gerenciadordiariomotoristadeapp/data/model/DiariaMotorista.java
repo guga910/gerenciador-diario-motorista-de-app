@@ -39,9 +39,16 @@ public class DiariaMotorista {
 //		this.valorCombustivel = valorCombustivel;
 //	}
 
+
 	public Long getId() {
 		return id;
 	}
+	public DiariaMotorista(LocalDate dia, BigDecimal valorBruto) {
+	super();
+	this.dia = dia;
+	this.valorBruto = valorBruto;
+}
+
 	public void setId(Long id) {
 		this.id = id;
 	}

@@ -1,12 +1,13 @@
 package com.example.gerenciadordiariomotoristadeapp.service;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.gerenciadordiariomotoristadeapp.converter.DozerConverter;
 import com.example.gerenciadordiariomotoristadeapp.data.model.DiariaMotorista;
@@ -14,15 +15,19 @@ import com.example.gerenciadordiariomotoristadeapp.data.model.resumo.DiariaMotor
 import com.example.gerenciadordiariomotoristadeapp.data.vo.DiariaMotoristaVo;
 import com.example.gerenciadordiariomotoristadeapp.repository.DiariaMotoristaRepository;
 
-public class DiariaMotoristaResumoService {
+@Service
+public class DiariaMotoristaResumoService implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Autowired
 	private DiariaMotoristaRepository repository;
 
 	public DiariaMotoristaResumo resumoSemana(LocalDate data) {
 		LocalDate segunda = segundaAntesDaData(data);
-		List<DiariaMotorista> listaSemana = repository.findASemanaDoDia(segunda, segunda.plusWeeks(7));
+		List<DiariaMotorista> listaSemana = repository.findBySemanaDoDia(segunda, segunda.plusWeeks(6));
 		List<DiariaMotoristaVo> listaSemanaVo = DozerConverter.parseListObjects(listaSemana, DiariaMotoristaVo.class);
+
 		return resumoTotalNoPeriodo(listaSemanaVo);
 	}
 
@@ -45,7 +50,8 @@ public class DiariaMotoristaResumoService {
 	}
 
 	protected DiariaMotoristaResumo resumoTotalNoPeriodo(List<DiariaMotoristaVo> lista) {
-		DiariaMotoristaResumo resumo = new DiariaMotoristaResumo();
+		DiariaMotoristaResumo resumoTotal = new DiariaMotoristaResumo();
+
 		int kmsRodados = 0;
 		BigDecimal totalBruto = BigDecimal.ZERO;
 		BigDecimal totalCombustivel = BigDecimal.ZERO;
@@ -53,20 +59,26 @@ public class DiariaMotoristaResumoService {
 		BigDecimal RealPorKm = BigDecimal.ZERO;
 
 		for (int i = 0; i < lista.size(); i++) {
-			kmsRodados += (lista.get(i).getKmFinal() - lista.get(i).getKmInicial());
+			System.out.println("Inicio: "+lista.get(i).getKmInicial());
+			System.out.println("final: "+lista.get(i).getKmFim());
+			kmsRodados += (lista.get(i).getKmFim() - lista.get(i).getKmInicial());
+			
 		}
+		
 		totalBruto = lista.stream().map(i -> i.getValorBruto()).reduce(BigDecimal.ZERO, BigDecimal::add);
 		totalCombustivel = lista.stream().map(i -> i.getValorCombustivel()).reduce(BigDecimal.ZERO, BigDecimal::add);
 		totalLiquido = totalBruto.subtract(totalCombustivel);
-		RealPorKm = totalLiquido.divide(new BigDecimal(kmsRodados), RoundingMode.HALF_UP);
+//		RealPorKm = totalLiquido.divide(new BigDecimal(kmsRodados), RoundingMode.HALF_UP); // com arredondamento para cima
+		RealPorKm = totalLiquido.divide(new BigDecimal(kmsRodados));
 
-		resumo.setDiasTrabalhados(lista.size());
-		resumo.setKmsRodados(kmsRodados);
-		resumo.setValorBruto(totalBruto);
-		resumo.setValorCombustivel(totalCombustivel);
-		resumo.setValorLiquido(totalLiquido);
-		resumo.setRealPorKm(RealPorKm);
-		return resumo;
+		resumoTotal.setDiasTrabalhados(lista.size());
+		resumoTotal.setKmsRodados(kmsRodados);
+		resumoTotal.setValorBruto(totalBruto);
+		resumoTotal.setValorCombustivel(totalCombustivel);
+		resumoTotal.setValorLiquido(totalLiquido);
+		resumoTotal.setRealPorKm(RealPorKm);
+
+		return resumoTotal;
 	}
 
 	protected LocalDate segundaAntesDaData(LocalDate data) {
